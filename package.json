@@ -1,0 +1,17 @@
+{
+  "name": "simple-paint",
+  "version": "1.0.0",
+  "description": "A simple paint program running in the console.",
+  "main": "index.js",
+  "author": "Myles Fang",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.7.8",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.2"
+  },
+  "scripts": {
+    "build": "tsc --project ./",
+    "start": "node index.js"
+  }
+}
