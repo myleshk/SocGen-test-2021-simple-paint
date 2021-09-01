@@ -20,6 +20,7 @@ class Cell {
     }
   }
 
+  // setter
   fillBy(value: string) {
     this.type = CellType.filled;
     this.filledBy = value;
@@ -33,6 +34,15 @@ class Cell {
   setEmpty() {
     this.type = null;
     this.filledBy = null;
+  }
+
+  // getter
+  isFilledBy(c: string): boolean {
+    return this.type === CellType.filled && this.filledBy === c;
+  }
+
+  isLine(): boolean {
+    return this.type === CellType.line;
   }
 
   toString() {
@@ -79,12 +89,24 @@ export class Canvas {
   }
 
   //private
-  setCell(x: number, y: number, cell: Cell) {
+  validCoordinates(x: number, y: number): boolean {
+    return x >= 0 && x < this.width && y >= 0 && y < this.height;
+  }
+
+  private setCell(x: number, y: number, cell: Cell) {
     this.canvas[y][x] = cell;
   }
 
+  private getCell(x: number, y: number): Cell {
+    if (!this.validCoordinates(x, y)) {
+      throw `Coordinates (${x}, ${y}) out of canvas`;
+    }
+    return this.canvas[y][x];
+  }
+
+  // TODO: good?
   private static printRow(rowOfCells: (Cell | BorderCell)[]) {
-    console.log(rowOfCells.join(" "));
+    console.log(rowOfCells.join(""));
   }
 
   print() {
@@ -103,85 +125,109 @@ export class Canvas {
     Canvas.printRow(borderRow);
   }
 
-  // function createCanvas(data) {
-  //   if (data.w === 0 || data.h === 0) {
-  //     return;
-  //   }
-  //   const yAxisArr = [];
-  //   const border = 2;
-  //   const height = data.h + border;
-  //   const yAxisEnd = height - 1;
-  //   const width = data.w + border;
-  //   const xAxisEnd = width - 1;
-  //   for (let y = 0; y < height; y++) {
-  //     const xAxisArr = [];
-  //     for (let x = 0; x < width; x++) {
-  //       let drawValue = initDrawValue;
-  //       if (y === 0 || y === yAxisEnd) {
-  //         drawValue = xBorderValue;
-  //       } else if (x === 0 || x === xAxisEnd) {
-  //         drawValue = yBorderValue;
-  //       }
-  //       xAxisArr.push({
-  //         draw: drawValue,
-  //       });
-  //     }
-  //     yAxisArr.push(xAxisArr);
-  //   }
-  //   return yAxisArr;
-  // }
+  newLine(x1: number, y1: number, x2: number, y2: number) {
+    if (x1 === x2) {
+      // vertical line
 
-  // function updateCanvasData(updateData, canvasData) {
-  //   const len = updateData.length;
-  //   for (let i = 0; i < len; i++) {
-  //     const dataCoordinate = updateData[i];
-  //     const x = dataCoordinate[0];
-  //     const y = dataCoordinate[1];
-  //     if (canvasData[y] && canvasData[y][x]) {
-  //       const canvasDataCoordinate = canvasData[y][x];
-  //       if (canvasDataCoordinate.draw === initDrawValue) {
-  //         canvasDataCoordinate.draw = defaultDrawValue;
-  //       }
-  //     }
-  //   }
-  // }
+      if (y1 > y2) {
+        // swap y1 and y2 so that y1 < y2
+        const yTmp = y1;
+        y1 = y2;
+        y2 = yTmp;
+      }
 
-  // function newLine(data, canvasData) {
-  //   const newLineData = newLineApi(data);
-  //   updateCanvasData(newLineData, canvasData);
-  // }
+      // draw the line
+      for (let y = y1; y <= y2; y++) {
+        this.setCell(x1, y, new Cell({ type: CellType.line }));
+      }
+    } else if (y1 === y2) {
+      // horizontal line
 
-  // function newRectangle(data, canvasData) {
-  //   const newRectangleData = newRectangleApi(data);
-  //   updateCanvasData(newRectangleData, canvasData);
-  // }
+      if (x1 > x2) {
+        // swap x1 and x2 so that x1 < x2
+        const xTmp = x1;
+        x1 = x2;
+        x2 = xTmp;
+      }
 
-  // function fill(data, canvasData) {
-  //   fillApi(data, canvasData, initDrawValue);
-  // }
+      // draw the line
+      for (let x = x1; x <= x2; x++) {
+        this.setCell(x, y1, new Cell({ type: CellType.line }));
+      }
+    }
+  }
+
+  newRectangle(x1: number, y1: number, x2: number, y2: number) {
+    // assume x1 <= x2 and y1 <= y2
+
+    // draw the upper edge
+    this.newLine(x1, y1, x2, y1);
+    // draw the lower edge
+    this.newLine(x1, y2, x2, y2);
+    // draw the left edge
+    this.newLine(x1, y1, x1, y2);
+    // draw the right edge
+    this.newLine(x2, y1, x2, y2);
+  }
+
+  fill(x: number, y: number, c: string) {
+    if (!this.validCoordinates(x, y)) {
+      throw `Coordinates (${x}, ${y}) out of canvas`;
+    }
+
+    let tmpStack: [number, number][] = [[x, y]];
+
+    while (tmpStack.length) {
+      const [x0, y0] = tmpStack.pop()!;
+
+      if (!this.validCoordinates(x0, y0)) {
+        // cell out of canvas, skip
+        continue;
+      }
+
+      const cell0 = this.getCell(x0, y0);
+      if (!cell0.isLine() && !cell0.isFilledBy(c)) {
+        cell0.fillBy(c);
+        this.setCell(x0, y0, cell0);
+
+        // add adjacent coordinates
+        tmpStack.push([x0 - 1, y0]);
+        tmpStack.push([x0 + 1, y0]);
+        tmpStack.push([x0, y0 - 1]);
+        tmpStack.push([x0, y0 + 1]);
+      }
+    }
+  }
 }
 
-const canvas = new Canvas(20, 10);
+/**
+ * Test
+ */
 
-canvas.setCell(2, 2, new Cell({ type: CellType.line }));
-canvas.setCell(2, 3, new Cell({ type: CellType.line }));
-canvas.setCell(2, 4, new Cell({ type: CellType.line }));
-canvas.setCell(2, 5, new Cell({ type: CellType.line }));
+function drawLines(canvas: Canvas) {
+  canvas.newLine(12, 2, 12, 19);
+  canvas.newLine(47, 12, 2, 12);
+  // canvas.newLine(19, 12, 19, 7);
+}
 
-canvas.setCell(3, 5, new Cell({ type: CellType.line }));
-canvas.setCell(3, 6, new Cell({ type: CellType.line }));
-canvas.setCell(3, 7, new Cell({ type: CellType.line }));
-canvas.setCell(3, 8, new Cell({ type: CellType.line }));
+function drawRects(canvas: Canvas) {
+  canvas.newRectangle(2, 3, 27, 14);
+  canvas.newRectangle(16, 9, 43, 17);
+}
 
-canvas.setCell(2, 8, new Cell({ type: CellType.line }));
-canvas.setCell(3, 8, new Cell({ type: CellType.line }));
-canvas.setCell(4, 8, new Cell({ type: CellType.line }));
-canvas.setCell(5, 8, new Cell({ type: CellType.line }));
-canvas.setCell(6, 8, new Cell({ type: CellType.line }));
+function fill(canvas: Canvas) {
+  canvas.fill(10, 6, "2");
+  canvas.fill(41, 15, "4");
+  canvas.fill(17, 11, "7");
+  canvas.fill(41, 14, "9");
+}
 
-canvas.setCell(5, 5, new Cell({ type: CellType.filled, filledBy: "x" }));
-canvas.setCell(4, 4, new Cell({ type: CellType.filled, filledBy: "y" }));
+function test() {
+  const canvas = new Canvas(50, 20);
+  drawLines(canvas);
+  drawRects(canvas);
+  fill(canvas);
+  canvas.print();
+}
 
-// TODO: cross line?
-
-canvas.print();
+// test();
