@@ -8,7 +8,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.Canvas = void 0;
 var LINE_CELL = "x";
 var BORDER = ".";
@@ -44,8 +44,8 @@ var Cell = /** @class */ (function () {
         this.filledBy = null;
     };
     // getter
-    Cell.prototype.isFilled = function () {
-        return this.type === CellType.filled;
+    Cell.prototype.isFilledBy = function (c) {
+        return this.type === CellType.filled && this.filledBy === c;
     };
     Cell.prototype.isLine = function () {
         return this.type === CellType.line;
@@ -89,19 +89,25 @@ var Canvas = /** @class */ (function () {
             }
         }
         else {
-            throw "Both width and height must be greater than zero";
+            console.error("Both width and height must be greater than zero");
+            return;
         }
     }
     //private
     Canvas.prototype.validCoordinates = function (x, y) {
-        return x < 0 || x >= this.width || y < 0 || y >= this.height;
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
     };
     Canvas.prototype.setCell = function (x, y, cell) {
+        if (!this.validCoordinates(x, y)) {
+            console.error("Coordinates out of canvas");
+            return;
+        }
         this.canvas[y][x] = cell;
     };
     Canvas.prototype.getCell = function (x, y) {
         if (!this.validCoordinates(x, y)) {
-            throw "Coordinates (" + x + ", " + y + ") out of canvas";
+            console.error("Coordinates out of canvas");
+            return null;
         }
         return this.canvas[y][x];
     };
@@ -123,6 +129,10 @@ var Canvas = /** @class */ (function () {
         Canvas.printRow(borderRow);
     };
     Canvas.prototype.newLine = function (x1, y1, x2, y2) {
+        if (!this.validCoordinates(x1, y1) && !this.validCoordinates(x2, y2)) {
+            console.error("Coordinates out of canvas");
+            return;
+        }
         if (x1 === x2) {
             // vertical line
             if (y1 > y2) {
@@ -149,8 +159,16 @@ var Canvas = /** @class */ (function () {
                 this.setCell(x, y1, new Cell({ type: CellType.line }));
             }
         }
+        else {
+            // TODO: implement
+            console.error("Currently only vertical and horizontal lines are supported");
+        }
     };
     Canvas.prototype.newRectangle = function (x1, y1, x2, y2) {
+        if (!this.validCoordinates(x1, y1) && !this.validCoordinates(x2, y2)) {
+            console.error("Coordinates out of canvas");
+            return;
+        }
         // assume x1 <= x2 and y1 <= y2
         // draw the upper edge
         this.newLine(x1, y1, x2, y1);
@@ -163,7 +181,12 @@ var Canvas = /** @class */ (function () {
     };
     Canvas.prototype.fill = function (x, y, c) {
         if (!this.validCoordinates(x, y)) {
-            throw "Coordinates (" + x + ", " + y + ") out of canvas";
+            console.error("Coordinates out of canvas");
+            return;
+        }
+        if (c.length !== 1) {
+            console.error("\"c\" must be a single charactor");
+            return;
         }
         var tmpStack = [[x, y]];
         while (tmpStack.length) {
@@ -173,7 +196,7 @@ var Canvas = /** @class */ (function () {
                 continue;
             }
             var cell0 = this.getCell(x0, y0);
-            if (!cell0.isLine()) {
+            if (!cell0.isLine() && !cell0.isFilledBy(c)) {
                 cell0.fillBy(c);
                 this.setCell(x0, y0, cell0);
                 // add adjacent coordinates
@@ -187,22 +210,29 @@ var Canvas = /** @class */ (function () {
     return Canvas;
 }());
 exports.Canvas = Canvas;
+/**
+ * Test
+ */
 function drawLines(canvas) {
-    canvas.newLine(12, 2, 12, 5);
-    canvas.newLine(32, 18, 46, 18);
-    canvas.newLine(27, 10, 22, 10);
-    canvas.newLine(19, 12, 19, 7);
+    canvas.newLine(12, 2, 12, 19);
+    canvas.newLine(47, 12, 2, 12);
+    // canvas.newLine(19, 12, 19, 7);
 }
 function drawRects(canvas) {
     canvas.newRectangle(2, 3, 27, 14);
     canvas.newRectangle(16, 9, 43, 17);
 }
 function fill(canvas) {
-    canvas.fill(10, 6, "5");
+    canvas.fill(10, 6, "2");
+    canvas.fill(41, 15, "4");
+    canvas.fill(17, 11, "7");
+    canvas.fill(41, 14, "9");
 }
-var canvas = new Canvas(50, 20);
-// drawLines(canvas);
-drawRects(canvas);
-fill(canvas);
-canvas.print();
-// drawRects();
+function test() {
+    var canvas = new Canvas(50, 20);
+    drawLines(canvas);
+    drawRects(canvas);
+    fill(canvas);
+    canvas.print();
+}
+// test();

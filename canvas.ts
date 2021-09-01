@@ -84,7 +84,8 @@ export class Canvas {
         this.canvas.push(rowOfCells);
       }
     } else {
-      throw "Both width and height must be greater than zero";
+      console.error("Both width and height must be greater than zero");
+      return;
     }
   }
 
@@ -94,12 +95,17 @@ export class Canvas {
   }
 
   private setCell(x: number, y: number, cell: Cell) {
+    if (!this.validCoordinates(x, y)) {
+      console.error(`Coordinates out of canvas`);
+      return;
+    }
     this.canvas[y][x] = cell;
   }
 
-  private getCell(x: number, y: number): Cell {
+  private getCell(x: number, y: number): Cell | null {
     if (!this.validCoordinates(x, y)) {
-      throw `Coordinates (${x}, ${y}) out of canvas`;
+      console.error(`Coordinates out of canvas`);
+      return null;
     }
     return this.canvas[y][x];
   }
@@ -126,6 +132,11 @@ export class Canvas {
   }
 
   newLine(x1: number, y1: number, x2: number, y2: number) {
+    if (!this.validCoordinates(x1, y1) && !this.validCoordinates(x2, y2)) {
+      console.error(`Coordinates out of canvas`);
+      return;
+    }
+
     if (x1 === x2) {
       // vertical line
 
@@ -154,10 +165,20 @@ export class Canvas {
       for (let x = x1; x <= x2; x++) {
         this.setCell(x, y1, new Cell({ type: CellType.line }));
       }
+    } else {
+      // TODO: implement
+      console.error(
+        "Currently only vertical and horizontal lines are supported"
+      );
     }
   }
 
   newRectangle(x1: number, y1: number, x2: number, y2: number) {
+    if (!this.validCoordinates(x1, y1) && !this.validCoordinates(x2, y2)) {
+      console.error(`Coordinates out of canvas`);
+      return;
+    }
+
     // assume x1 <= x2 and y1 <= y2
 
     // draw the upper edge
@@ -172,7 +193,12 @@ export class Canvas {
 
   fill(x: number, y: number, c: string) {
     if (!this.validCoordinates(x, y)) {
-      throw `Coordinates (${x}, ${y}) out of canvas`;
+      console.error(`Coordinates out of canvas`);
+      return;
+    }
+    if (c.length !== 1) {
+      console.error(`"c" must be a single charactor`);
+      return;
     }
 
     let tmpStack: [number, number][] = [[x, y]];
@@ -185,7 +211,7 @@ export class Canvas {
         continue;
       }
 
-      const cell0 = this.getCell(x0, y0);
+      const cell0 = this.getCell(x0, y0)!;
       if (!cell0.isLine() && !cell0.isFilledBy(c)) {
         cell0.fillBy(c);
         this.setCell(x0, y0, cell0);
