@@ -35,11 +35,6 @@ class Cell {
     this.filledBy = null;
   }
 
-  setEmpty() {
-    this.type = null;
-    this.filledBy = null;
-  }
-
   // getter
   isFilledBy(c: string): boolean {
     return this.type === CellType.filled && this.filledBy === c;
@@ -170,7 +165,9 @@ export class Canvas {
       throw new OutOfCanvasError();
     }
 
-    // assume x1 <= x2 and y1 <= y2
+    if (x1 >= x2 || y1 >= y2) {
+      throw new Error("Invalid coordinates of rectangle");
+    }
 
     // draw the upper edge
     this.newLine(x1, y1, x2, y1);
