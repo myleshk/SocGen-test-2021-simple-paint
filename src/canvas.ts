@@ -75,20 +75,23 @@ export class Canvas {
   width: number = 0;
 
   constructor(width: number, height: number) {
-    if (width > 0 && height > 0) {
-      // init canvas
-      this.width = width;
-      this.height = height;
-      this.canvas = [];
-      for (let y = 0; y < height; y++) {
-        const rowOfCells = [];
-        for (let x = 0; x < width; x++) {
-          rowOfCells.push(new Cell());
-        }
-        this.canvas.push(rowOfCells);
-      }
-    } else {
+    if (width <= 0 || height <= 0) {
       throw Error("Both width and height must be greater than zero");
+    }
+    if (width > 200 || height > 200) {
+      // limit for performance
+      throw Error("Both width and height must be smaller than 200");
+    }
+    // init canvas
+    this.width = width;
+    this.height = height;
+    this.canvas = [];
+    for (let y = 0; y < height; y++) {
+      const rowOfCells = [];
+      for (let x = 0; x < width; x++) {
+        rowOfCells.push(new Cell());
+      }
+      this.canvas.push(rowOfCells);
     }
   }
 
@@ -189,8 +192,8 @@ export class Canvas {
   }
 
   fill(x: number, y: number, c: string) {
-    if (!this.validCoordinates(x, y)) {
-      throw new OutOfCanvasError();
+    if (this.getCell(x, y).isLine()) {
+      throw new Error("Cannot fill on the line");
     }
 
     let tmpStack: [number, number][] = [[x, y]];
@@ -203,10 +206,10 @@ export class Canvas {
         continue;
       }
 
-      const cell0 = this.getCell(x0, y0)!;
-      if (!cell0.isLine() && !cell0.isFilledBy(c)) {
-        cell0.fillBy(c);
-        this.setCell(x0, y0, cell0);
+      const cell = this.getCell(x0, y0)!;
+      if (!cell.isLine() && !cell.isFilledBy(c)) {
+        cell.fillBy(c);
+        this.setCell(x0, y0, cell);
 
         // add adjacent coordinates
         tmpStack.push([x0 - 1, y0]);
