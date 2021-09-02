@@ -132,11 +132,12 @@ export class ConsoleInterface {
         case CommandAction.quit:
           process.exit();
       }
-
-      // print latest canvas
-      this.canvas!.print();
     } catch (error: any) {
       console.error(`Error: ${error.message || DEFAULT_ERROR_MESSAGE}`);
+    }
+    // always print latest canvas
+    if (this.canvas) {
+      console.log(this.canvas.toString());
     }
     console.log(DEFAULT_PROMPT);
   }

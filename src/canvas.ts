@@ -62,13 +62,6 @@ class Cell {
     }
   }
 }
-
-class BorderCell {
-  toString() {
-    return BORDER;
-  }
-}
-
 export class Canvas {
   canvas: Cell[][] = [];
   height: number = 0;
@@ -114,25 +107,23 @@ export class Canvas {
     return this.canvas[y][x];
   }
 
-  // TODO: good?
-  private static printRow(rowOfCells: (Cell | BorderCell)[]) {
-    console.log(rowOfCells.join(""));
-  }
+  toString(): string {
+    const borderRowString = new Array(this.width + 2).fill(BORDER).join("");
 
-  print() {
-    const borderCell = new BorderCell();
-    const borderRow = new Array(this.width + 2).fill(borderCell);
+    let resultString = "";
 
     // add top border
-    Canvas.printRow(borderRow);
+    resultString += borderRowString + "\n";
 
     for (const rowData of this.canvas) {
-      // add side border cells
-      Canvas.printRow([borderCell, ...rowData, borderCell]);
+      // add side borders
+      resultString += BORDER + rowData.join("") + BORDER + "\n";
     }
 
     // add bottom border
-    Canvas.printRow(borderRow);
+    resultString += borderRowString;
+
+    return resultString;
   }
 
   newLine(x1: number, y1: number, x2: number, y2: number) {
@@ -220,35 +211,3 @@ export class Canvas {
     }
   }
 }
-
-/**
- * Test
- */
-
-function drawLines(canvas: Canvas) {
-  canvas.newLine(12, 2, 12, 19);
-  canvas.newLine(47, 12, 2, 12);
-  // canvas.newLine(19, 12, 19, 7);
-}
-
-function drawRects(canvas: Canvas) {
-  canvas.newRectangle(2, 3, 27, 14);
-  canvas.newRectangle(16, 9, 43, 17);
-}
-
-function fill(canvas: Canvas) {
-  canvas.fill(10, 6, "2");
-  canvas.fill(41, 15, "4");
-  canvas.fill(17, 11, "7");
-  canvas.fill(41, 14, "9");
-}
-
-function test() {
-  const canvas = new Canvas(50, 20);
-  drawLines(canvas);
-  drawRects(canvas);
-  fill(canvas);
-  canvas.print();
-}
-
-// test();
