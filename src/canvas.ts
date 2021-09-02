@@ -1,3 +1,7 @@
+class OutOfCanvasError extends Error {
+  message = "Coordinates are outside the canvas";
+}
+
 const LINE_CELL = "x";
 const BORDER = ".";
 const EMPTY_CELL = " ";
@@ -84,28 +88,25 @@ export class Canvas {
         this.canvas.push(rowOfCells);
       }
     } else {
-      console.error("Both width and height must be greater than zero");
-      return;
+      throw Error("Both width and height must be greater than zero");
     }
   }
 
   //private
-  validCoordinates(x: number, y: number): boolean {
+  private validCoordinates(x: number, y: number): boolean {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
   private setCell(x: number, y: number, cell: Cell) {
     if (!this.validCoordinates(x, y)) {
-      console.error(`Coordinates out of canvas`);
-      return;
+      throw new OutOfCanvasError();
     }
     this.canvas[y][x] = cell;
   }
 
-  private getCell(x: number, y: number): Cell | null {
+  private getCell(x: number, y: number): Cell {
     if (!this.validCoordinates(x, y)) {
-      console.error(`Coordinates out of canvas`);
-      return null;
+      throw new OutOfCanvasError();
     }
     return this.canvas[y][x];
   }
@@ -132,9 +133,8 @@ export class Canvas {
   }
 
   newLine(x1: number, y1: number, x2: number, y2: number) {
-    if (!this.validCoordinates(x1, y1) && !this.validCoordinates(x2, y2)) {
-      console.error(`Coordinates out of canvas`);
-      return;
+    if (!this.validCoordinates(x1, y1) || !this.validCoordinates(x2, y2)) {
+      throw new OutOfCanvasError();
     }
 
     if (x1 === x2) {
@@ -167,16 +167,13 @@ export class Canvas {
       }
     } else {
       // TODO: implement
-      console.error(
-        "Currently only vertical and horizontal lines are supported"
-      );
+      throw Error("Currently only vertical and horizontal lines are supported");
     }
   }
 
   newRectangle(x1: number, y1: number, x2: number, y2: number) {
-    if (!this.validCoordinates(x1, y1) && !this.validCoordinates(x2, y2)) {
-      console.error(`Coordinates out of canvas`);
-      return;
+    if (!this.validCoordinates(x1, y1) || !this.validCoordinates(x2, y2)) {
+      throw new OutOfCanvasError();
     }
 
     // assume x1 <= x2 and y1 <= y2
@@ -193,12 +190,7 @@ export class Canvas {
 
   fill(x: number, y: number, c: string) {
     if (!this.validCoordinates(x, y)) {
-      console.error(`Coordinates out of canvas`);
-      return;
-    }
-    if (c.length !== 1) {
-      console.error(`"c" must be a single charactor`);
-      return;
+      throw new OutOfCanvasError();
     }
 
     let tmpStack: [number, number][] = [[x, y]];
