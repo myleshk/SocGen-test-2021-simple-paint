@@ -49,7 +49,7 @@ export class ConsoleInterface {
     switch (action as CommandAction) {
       case CommandAction.create:
         data = rawData.map((v) => Number(v));
-        if (rawData.length !== 2 || !data.every((v) => v > 0)) {
+        if (rawData.length !== 2 || data.some((v) => isNaN(v as number))) {
           throw new InvalidCommandError();
         }
         break;
@@ -57,7 +57,7 @@ export class ConsoleInterface {
       case CommandAction.line:
       case CommandAction.rectangle:
         data = rawData.map((v) => Number(v));
-        if (rawData.length !== 4 || !data.every((v) => v > 0)) {
+        if (rawData.length !== 4 || data.some((v) => isNaN(v as number))) {
           throw new InvalidCommandError();
         }
         break;
@@ -66,8 +66,8 @@ export class ConsoleInterface {
         data = [Number(rawData[0]), Number(rawData[1]), rawData[2]];
         if (
           rawData.length !== 3 ||
-          !data.every((v, index) =>
-            index < 2 ? v > 0 : (v as string).length === 1
+          data.some((v, index) =>
+            index < 2 ? isNaN(v as number) : (v as string).length !== 1
           )
         ) {
           throw new InvalidCommandError();
