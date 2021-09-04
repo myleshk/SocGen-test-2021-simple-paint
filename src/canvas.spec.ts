@@ -132,9 +132,44 @@ describe("class Canvas", () => {
         ]);
       });
 
+      it("can draw line with arguments in reverse order", () => {
+        canvas.newLine(8, 2, 2, 2);
+        canvas.newLine(4, 8, 4, 1);
+
+        const rowWithVerticalLine = [
+          BORDER,
+          getEmptyCellsString(4),
+          LINE_CELL,
+          getEmptyCellsString(5),
+          BORDER,
+        ].join("");
+
+        expect(canvas.toString().split("\n")).eql([
+          getBorderRowString(12),
+          emptyRow,
+          rowWithVerticalLine,
+          [
+            BORDER,
+            getEmptyCellsString(2),
+            getLineCellsString(7),
+            EMPTY_CELL,
+            BORDER,
+          ].join(""),
+          ...new Array(6).fill(rowWithVerticalLine),
+          emptyRow,
+          getBorderRowString(12),
+        ]);
+      });
+
       it("line outside canvas should fail", () => {
         expect(() => {
           canvas.newLine(20, 1, 20, 10);
+        }).to.throw();
+      });
+
+      it("line not vertical or horizontal should fail", () => {
+        expect(() => {
+          canvas.newLine(1, 2, 3, 4);
         }).to.throw();
       });
     });

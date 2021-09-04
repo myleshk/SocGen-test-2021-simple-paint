@@ -15,15 +15,6 @@ class Cell {
   private filledBy: string | null = null;
   private type: CellType | null = null;
 
-  constructor(cell?: { type: CellType; filledBy?: string | null }) {
-    // set cell according to provided values
-    if (cell?.filledBy) {
-      this.fillBy(cell.filledBy);
-    } else if (cell?.type === CellType.line) {
-      this.setLine();
-    }
-  }
-
   // setter
   fillBy(value: string) {
     this.type = CellType.filled;
