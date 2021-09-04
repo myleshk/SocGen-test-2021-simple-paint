@@ -1,10 +1,12 @@
-class OutOfCanvasError extends Error {
-  message = "Coordinates are outside the canvas";
-}
-
 const LINE_CELL = "x";
 const BORDER = ".";
 const EMPTY_CELL = " ";
+const MAX_CANVAS_WIDTH = 200;
+const MAX_CANVAS_HEIGHT = 200;
+
+class OutOfCanvasError extends Error {
+  message = "Coordinates are outside the canvas";
+}
 
 enum CellType {
   line = "line",
@@ -57,7 +59,7 @@ export class Canvas {
     if (width <= 0 || height <= 0) {
       throw Error("Both width and height must be greater than zero");
     }
-    if (width > 200 || height > 200) {
+    if (width > MAX_CANVAS_WIDTH || height > MAX_CANVAS_HEIGHT) {
       // limit for performance
       throw Error("Both width and height must be smaller than 200");
     }
