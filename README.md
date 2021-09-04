@@ -1,0 +1,1 @@
+# SocGen-test-2021-simple-paint
