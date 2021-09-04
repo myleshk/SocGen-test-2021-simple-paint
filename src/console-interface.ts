@@ -18,24 +18,8 @@ enum CommandAction {
 
 type CommandData = (number | string)[];
 
-const DEFAULT_PROMPT = "\nPlease input command: ";
-const DEFAULT_ERROR_MESSAGE = "Unkown error";
-
 export class ConsoleInterface {
-  stdin: NodeJS.Socket;
-  canvas: Canvas | null = null;
-
-  constructor() {
-    this.stdin = process.openStdin();
-    this.listen();
-  }
-
-  listen() {
-    this.stdin.addListener("data", (rawData) =>
-      this.executeCommand(rawData.toString().trim())
-    );
-    console.log(DEFAULT_PROMPT);
-  }
+  private canvas: Canvas | null = null;
 
   private static unpackCommandOrThrow(command: string): {
     action: CommandAction;
@@ -87,66 +71,59 @@ export class ConsoleInterface {
     return { action, data };
   }
 
-  private executeCommand(command: string) {
-    try {
-      const { action, data } = ConsoleInterface.unpackCommandOrThrow(command);
+  executeCommand(command: string): string {
+    const { action, data } = ConsoleInterface.unpackCommandOrThrow(command);
 
-      // check if canvas is ready
-      if (action !== CommandAction.create && !this.canvas) {
-        throw new MissingCanvas();
-      }
-
-      switch (action) {
-        case CommandAction.create:
-          // create canvas
-          this.canvas = new Canvas(data[0] as number, data[1] as number);
-          break;
-
-        case CommandAction.line:
-          // draw new line
-          this.canvas!.newLine(
-            data[0] as number,
-            data[1] as number,
-            data[2] as number,
-            data[3] as number
-          );
-          break;
-
-        case CommandAction.rectangle:
-          this.canvas!.newRectangle(
-            data[0] as number,
-            data[1] as number,
-            data[2] as number,
-            data[3] as number
-          );
-          break;
-
-        case CommandAction.bucketFill:
-          this.canvas!.fill(
-            data[0] as number,
-            data[1] as number,
-            data[2] as string
-          );
-          break;
-
-        case CommandAction.quit:
-          process.exit();
-      }
-    } catch (error: any) {
-      console.error(`Error: ${error.message || DEFAULT_ERROR_MESSAGE}`);
+    // check if canvas is ready
+    if (
+      [
+        CommandAction.line,
+        CommandAction.rectangle,
+        CommandAction.bucketFill,
+      ].includes(action) &&
+      !this.canvas
+    ) {
+      throw new MissingCanvas();
     }
+
+    switch (action) {
+      case CommandAction.create:
+        // create canvas
+        this.canvas = new Canvas(data[0] as number, data[1] as number);
+        break;
+
+      case CommandAction.line:
+        // draw new line
+        this.canvas!.newLine(
+          data[0] as number,
+          data[1] as number,
+          data[2] as number,
+          data[3] as number
+        );
+        break;
+
+      case CommandAction.rectangle:
+        this.canvas!.newRectangle(
+          data[0] as number,
+          data[1] as number,
+          data[2] as number,
+          data[3] as number
+        );
+        break;
+
+      case CommandAction.bucketFill:
+        this.canvas!.fill(
+          data[0] as number,
+          data[1] as number,
+          data[2] as string
+        );
+        break;
+
+      case CommandAction.quit:
+        process.exit();
+    }
+
     // always print latest canvas
-    if (this.canvas) {
-      console.log(this.canvas.toString());
-    }
-    console.log(DEFAULT_PROMPT);
+    return this.canvas?.toString() || "";
   }
 }
-
-/**
- * Test
- */
-
-function test() {}
-
-// test();
