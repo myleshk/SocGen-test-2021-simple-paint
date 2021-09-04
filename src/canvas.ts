@@ -88,13 +88,6 @@ export class Canvas {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
-  private setCell(x: number, y: number, cell: Cell) {
-    if (!this.validCoordinates(x, y)) {
-      throw new OutOfCanvasError();
-    }
-    this.canvas[y][x] = cell;
-  }
-
   private getCell(x: number, y: number): Cell {
     if (!this.validCoordinates(x, y)) {
       throw new OutOfCanvasError();
@@ -138,7 +131,7 @@ export class Canvas {
 
       // draw the line
       for (let y = y1; y <= y2; y++) {
-        this.setCell(x1, y, new Cell({ type: CellType.line }));
+        this.getCell(x1, y).setLine();
       }
     } else if (y1 === y2) {
       // horizontal line
@@ -152,7 +145,7 @@ export class Canvas {
 
       // draw the line
       for (let x = x1; x <= x2; x++) {
-        this.setCell(x, y1, new Cell({ type: CellType.line }));
+        this.getCell(x, y1).setLine();
       }
     } else {
       // TODO: implement
@@ -197,7 +190,6 @@ export class Canvas {
       const cell = this.getCell(x0, y0)!;
       if (!cell.isLine() && !cell.isFilledBy(c)) {
         cell.fillBy(c);
-        this.setCell(x0, y0, cell);
 
         // add adjacent coordinates
         tmpStack.push([x0 - 1, y0]);
