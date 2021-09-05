@@ -45,11 +45,27 @@ describe("class Canvas", () => {
 
     it("size of 0 should fail", () => {
       expect(() => {
+        new Canvas(10, 0);
+      }).to.throw();
+
+      expect(() => {
+        new Canvas(0, 10);
+      }).to.throw();
+
+      expect(() => {
         new Canvas(0, 0);
       }).to.throw();
     });
 
     it("size too large should fail", () => {
+      expect(() => {
+        new Canvas(1, 300);
+      }).to.throw();
+
+      expect(() => {
+        new Canvas(300, 1);
+      }).to.throw();
+
       expect(() => {
         new Canvas(300, 300);
       }).to.throw();
