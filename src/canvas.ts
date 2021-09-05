@@ -4,7 +4,7 @@ const LINE_CELL = "x";
 const BORDER = ".";
 const EMPTY_CELL = " ";
 const MAX_CANVAS_WIDTH = 200;
-const MAX_CANVAS_HEIGHT = 200;
+const MAX_CANVAS_HEIGHT = 50;
 
 // Error classes
 
@@ -17,11 +17,11 @@ class OutOfCanvasError extends InvalidCoordinatesError {
 class InvalidColorError extends Error {}
 
 class InvalidWidthError extends Error {
-  message = "Width must be from 1 to 200";
+  message = `Width must be from 1 to ${MAX_CANVAS_WIDTH}`;
 }
 
 class InvalidHeightError extends Error {
-  message = "Height must be from 1 to 200";
+  message = `Height must be from 1 to ${MAX_CANVAS_HEIGHT}`;
 }
 
 // Type definitions

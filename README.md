@@ -106,7 +106,7 @@ There are a few limitations and assumptions.
 
 - As the program is simple, a very basic algorithm ([four-way flood fill](https://en.wikipedia.org/wiki/Flood_fill)) for calculating bucket fill result is used. It might cause performance issue if the canvas becomes large.
 
-- Considering the above point plus the screen size, the max height and width are both limited to 200.
+- Considering the above point plus the screen size, the max height and width are limited to 200 and 50 respectively.
 
 ## License
 
