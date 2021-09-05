@@ -1,8 +1,12 @@
+// Constants
+
 const LINE_CELL = "x";
 const BORDER = ".";
 const EMPTY_CELL = " ";
 const MAX_CANVAS_WIDTH = 200;
 const MAX_CANVAS_HEIGHT = 200;
+
+// Error classes
 
 class InvalidCoordinatesError extends Error {}
 
@@ -22,6 +26,8 @@ class InvalidHeightError extends Error {
   message = "Height must be from 1 to 200";
 }
 
+// Type definitions
+
 enum CellType {
   line = "line",
   filled = "filled",
@@ -31,27 +37,49 @@ class Cell {
   private filledBy: string | null = null;
   private type: CellType | null = null;
 
-  // setter
-  fillBy(value: string) {
+  /**
+   * Fill cell with color.
+   *
+   * @param color - The color to fill.
+   */
+  fillBy(color: string) {
     this.type = CellType.filled;
-    this.filledBy = value;
+    this.filledBy = color;
   }
 
+  /**
+   * Set cell to be part of a line.
+   */
   setLine() {
     this.type = CellType.line;
     this.filledBy = null;
   }
 
-  // getter
-  isFilledBy(color: string): boolean {
+  /**
+   * If the cell is filled with the color.
+   *
+   * @param color - The color to check.
+   * @returns
+   */
+  isFilledWith(color: string): boolean {
     Cell.validateColor(color);
     return this.type === CellType.filled && this.filledBy === color;
   }
 
+  /**
+   * If the cell is part of a line.
+   *
+   * @returns
+   */
   isLine(): boolean {
     return this.type === CellType.line;
   }
 
+  /**
+   * Get string representation of the cell.
+   *
+   * @returns The string of length one.
+   */
   toString() {
     switch (this.type) {
       case CellType.filled:
@@ -65,18 +93,31 @@ class Cell {
     }
   }
 
+  /**
+   * Validates color. If fails, throw an error.
+   *
+   * @param color The color to validate.
+   */
   static validateColor(color: string) {
     if (!/^(?!x)[a-z0-9]$/i.test(color)) {
       throw new InvalidColorError();
     }
   }
 }
+
 export class Canvas {
   canvas: Cell[][] = [];
   height: number = 0;
   width: number = 0;
 
+  /**
+   * Initiate the canvas with the specified dimensions.
+   *
+   * @param width
+   * @param height
+   */
   constructor(width: number, height: number) {
+    // validations
     if (width <= 0 || width > MAX_CANVAS_WIDTH) {
       throw new InvalidWidthError();
     }
@@ -85,7 +126,7 @@ export class Canvas {
       throw new InvalidHeightError();
     }
 
-    // init canvas
+    // fill canvas with cells
     this.width = width;
     this.height = height;
     this.canvas = [];
@@ -98,11 +139,24 @@ export class Canvas {
     }
   }
 
-  //private
+  /**
+   * Check if the coordinates are within the canvas.
+   *
+   * @param x
+   * @param y
+   * @returns
+   */
   private validCoordinates(x: number, y: number): boolean {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
+  /**
+   * Get the cell at the specified coordinates.
+   *
+   * @param x
+   * @param y
+   * @returns
+   */
   private getCell(x: number, y: number): Cell {
     if (!this.validCoordinates(x, y)) {
       throw new OutOfCanvasError();
@@ -110,6 +164,11 @@ export class Canvas {
     return this.canvas[y][x];
   }
 
+  /**
+   * Get string representation of the whole canvas with borders.
+   *
+   * @returns
+   */
   toString(): string {
     const borderRowString = new Array(this.width + 2).fill(BORDER).join("");
 
@@ -129,6 +188,14 @@ export class Canvas {
     return resultString;
   }
 
+  /**
+   * Draw a line from (x1, y1) to (x2, y2)
+   *
+   * @param x1
+   * @param y1
+   * @param x2
+   * @param y2
+   */
   newLine(x1: number, y1: number, x2: number, y2: number) {
     if (!this.validCoordinates(x1, y1) || !this.validCoordinates(x2, y2)) {
       throw new OutOfCanvasError();
@@ -170,6 +237,14 @@ export class Canvas {
     }
   }
 
+  /**
+   * Draw a rectangle with (x1, y1) as the top left corner and (x2, y2) as the bottom right corner
+   *
+   * @param x1
+   * @param y1
+   * @param x2
+   * @param y2
+   */
   newRectangle(x1: number, y1: number, x2: number, y2: number) {
     if (!this.validCoordinates(x1, y1) || !this.validCoordinates(x2, y2)) {
       throw new OutOfCanvasError();
@@ -177,13 +252,13 @@ export class Canvas {
 
     if (x1 >= x2 || y1 >= y2) {
       throw new InvalidCoordinatesError(
-        "Coordinates of rectangle must be from top left to lower right"
+        "Coordinates of rectangle must be from top left to bottom right"
       );
     }
 
     // draw the upper edge
     this.newLine(x1, y1, x2, y1);
-    // draw the lower edge
+    // draw the bottom edge
     this.newLine(x1, y2, x2, y2);
     // draw the left edge
     this.newLine(x1, y1, x1, y2);
@@ -191,6 +266,13 @@ export class Canvas {
     this.newLine(x2, y1, x2, y2);
   }
 
+  /**
+   * Bucket fill the area containing (x, y) with the color (character) "c"
+   *
+   * @param x
+   * @param y
+   * @param c
+   */
   fill(x: number, y: number, c: string) {
     if (this.getCell(x, y).isLine()) {
       throw new InvalidCoordinatesError("Cannot fill on the line");
@@ -210,7 +292,7 @@ export class Canvas {
       }
 
       const cell = this.getCell(x0, y0)!;
-      if (!cell.isLine() && !cell.isFilledBy(c)) {
+      if (!cell.isLine() && !cell.isFilledWith(c)) {
         cell.fillBy(c);
 
         // add adjacent coordinates

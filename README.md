@@ -80,13 +80,13 @@ npm run start
 Once the program is running, input a command and press ENTER. Each command starts with one uppercase letter as the action parameter, then followed by data parameters (where applicable). Put exactly one space between each parameter.
 Currently the following 5 commands are supported.
 
-| Command       | Description                                                                                                 | Example       |
-| ------------- | ----------------------------------------------------------------------------------------------------------- | ------------- |
-| C w h         | Create a new canvas of width w and height h.                                                                | `C 20 10`     |
-| L x1 y1 x2 y2 | Create a new line from `(x1, y1)` to `(x2, y2)`. Only horizontal or vertical lines are supported.           | `L 1 1 10 1`  |
-| R x1 y1 x2 y2 | Create a new rectangle with `(x1, y1)` and `(x2, y2)` as the top left and lower right corners respectively. | `R 1 1 10 10` |
-| B x y c       | Bucket fill the area containing `(x, y)` with "color" `c` (single letter).                                  | `B 5 5 r`     |
-| Q             | Quit the program.                                                                                           | `Q`           |
+| Command       | Description                                                                                                  | Example       |
+| ------------- | ------------------------------------------------------------------------------------------------------------ | ------------- |
+| C w h         | Create a new canvas of width w and height h.                                                                 | `C 20 10`     |
+| L x1 y1 x2 y2 | Create a new line from `(x1, y1)` to `(x2, y2)`. Only horizontal or vertical lines are supported.            | `L 1 1 10 1`  |
+| R x1 y1 x2 y2 | Create a new rectangle with `(x1, y1)` and `(x2, y2)` as the top left and bottom right corners respectively. | `R 1 1 10 10` |
+| B x y c       | Bucket fill the area containing `(x, y)` with "color" `c` (single letter).                                   | `B 5 5 r`     |
+| Q             | Quit the program.                                                                                            | `Q`           |
 
 ## Limitations
 
@@ -94,7 +94,7 @@ There are a few limitations and assumptions.
 
 - The canvas starts from the top left corner as `(0, 0)`. `x` increases when going downwards and `y` increases rightwards.
 
-- Drawing line (L) accepts coordinates of 2 points in any order, e.g. either `x1 < x2` or `x1 > x2` is accepted. However, drawing rectangle only allows points specified from top to lower, left to right.
+- Drawing line (L) accepts coordinates of 2 points in any order, e.g. either `x1 < x2` or `x1 > x2` is accepted. However, drawing rectangle only allows points specified from top to bottom, left to right.
 
 - Bucket fill (B) only supports to be applied on empty or previously filled cells. If you try to fill on a line or a rectangle, an error will occur.
 

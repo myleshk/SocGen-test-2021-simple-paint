@@ -1,5 +1,6 @@
 import { Canvas } from "./canvas";
 
+// Error classes
 class InvalidCommandError extends Error {
   message = "Command is invalid";
 }
@@ -8,6 +9,7 @@ class MissingCanvas extends Error {
   message = "Canvas is not created yet";
 }
 
+// Type definitions
 enum CommandAction {
   create = "C",
   line = "L",
@@ -18,13 +20,21 @@ enum CommandAction {
 
 type CommandData = (number | string)[];
 
+interface UnpackedCommand {
+  action: CommandAction;
+  data: CommandData;
+}
+
 export class ConsoleInterface {
   private canvas: Canvas | null = null;
 
-  private static unpackCommandOrThrow(command: string): {
-    action: CommandAction;
-    data: CommandData;
-  } {
+  /**
+   * Parse the raw command string into unpacked command. Throws error if invalid.
+   *
+   * @param command - The raw command string input by user.
+   * @returns
+   */
+  private static unpackCommandOrThrow(command: string): UnpackedCommand {
     const [rawAction, ...rawData] = command.trim().split(/\s+/);
     const action = rawAction as CommandAction;
     let data: CommandData = [];
@@ -71,6 +81,12 @@ export class ConsoleInterface {
     return { action, data };
   }
 
+  /**
+   * Parse the raw command, then execute it. May throw errors.
+   *
+   * @param command
+   * @returns - The current string representing the canvas, empty string if canvas not available.
+   */
   executeCommand(command: string): string {
     const { action, data } = ConsoleInterface.unpackCommandOrThrow(command);
 
@@ -123,7 +139,7 @@ export class ConsoleInterface {
         process.exit();
     }
 
-    // always print latest canvas
+    // always return the latest canvas string
     return this.canvas?.toString() || "";
   }
 }
