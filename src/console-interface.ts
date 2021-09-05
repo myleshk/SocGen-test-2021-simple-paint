@@ -25,7 +25,7 @@ export class ConsoleInterface {
     action: CommandAction;
     data: CommandData;
   } {
-    const [rawAction, ...rawData] = command.split(" ");
+    const [rawAction, ...rawData] = command.trim().split(/\s+/);
     const action = rawAction as CommandAction;
     let data: CommandData = [];
 
