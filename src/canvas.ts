@@ -4,8 +4,22 @@ const EMPTY_CELL = " ";
 const MAX_CANVAS_WIDTH = 200;
 const MAX_CANVAS_HEIGHT = 200;
 
-class OutOfCanvasError extends Error {
+class InvalidCoordinatesError extends Error {}
+
+class OutOfCanvasError extends InvalidCoordinatesError {
   message = "Coordinates are outside the canvas";
+}
+
+class InvalidColorError extends Error {
+  message = "Invalid color, only single English letter or digit is allowed";
+}
+
+class InvalidWidthError extends Error {
+  message = "Width must be from 1 to 200";
+}
+
+class InvalidHeightError extends Error {
+  message = "Height must be from 1 to 200";
 }
 
 enum CellType {
@@ -29,8 +43,9 @@ class Cell {
   }
 
   // getter
-  isFilledBy(c: string): boolean {
-    return this.type === CellType.filled && this.filledBy === c;
+  isFilledBy(color: string): boolean {
+    Cell.validateColor(color);
+    return this.type === CellType.filled && this.filledBy === color;
   }
 
   isLine(): boolean {
@@ -49,6 +64,12 @@ class Cell {
         return EMPTY_CELL;
     }
   }
+
+  static validateColor(color: string) {
+    if (!/^(?!x)[a-z0-9]$/i.test(color)) {
+      throw new InvalidColorError();
+    }
+  }
 }
 export class Canvas {
   canvas: Cell[][] = [];
@@ -56,13 +77,14 @@ export class Canvas {
   width: number = 0;
 
   constructor(width: number, height: number) {
-    if (width <= 0 || height <= 0) {
-      throw Error("Both width and height must be greater than zero");
+    if (width <= 0 || width > MAX_CANVAS_WIDTH) {
+      throw new InvalidWidthError();
     }
-    if (width > MAX_CANVAS_WIDTH || height > MAX_CANVAS_HEIGHT) {
-      // limit for performance
-      throw Error("Both width and height must be smaller than 200");
+
+    if (height <= 0 || height > MAX_CANVAS_HEIGHT) {
+      throw new InvalidHeightError();
     }
+
     // init canvas
     this.width = width;
     this.height = height;
@@ -141,8 +163,10 @@ export class Canvas {
         this.getCell(x, y1).setLine();
       }
     } else {
-      // TODO: implement
-      throw Error("Currently only vertical and horizontal lines are supported");
+      // TODO: implement line with any direction
+      throw new InvalidCoordinatesError(
+        "Currently only vertical and horizontal lines are supported"
+      );
     }
   }
 
@@ -152,7 +176,9 @@ export class Canvas {
     }
 
     if (x1 >= x2 || y1 >= y2) {
-      throw new Error("Invalid coordinates of rectangle");
+      throw new InvalidCoordinatesError(
+        "Coordinates of rectangle must be from top left to lower right"
+      );
     }
 
     // draw the upper edge
@@ -167,8 +193,11 @@ export class Canvas {
 
   fill(x: number, y: number, c: string) {
     if (this.getCell(x, y).isLine()) {
-      throw new Error("Cannot fill on the line");
+      throw new InvalidCoordinatesError("Cannot fill on the line");
     }
+
+    // validate color and possibly throw and error
+    Cell.validateColor(c);
 
     let tmpStack: [number, number][] = [[x, y]];
 

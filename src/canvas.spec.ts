@@ -369,6 +369,40 @@ describe("class Canvas", () => {
         }).to.throw();
       });
 
+      it("fill with invalid color should fail", () => {
+        canvas.newRectangle(1, 1, 5, 5);
+
+        const fillWithColor = (color: string) => {
+          canvas.fill(3, 3, color);
+        };
+
+        // first try to fill with a valid color
+        expect(() => {
+          fillWithColor("c");
+        }).to.not.throw();
+
+        // invalid should fail
+        expect(() => {
+          fillWithColor("cc");
+        }).to.throw();
+
+        expect(() => {
+          fillWithColor("x");
+        }).to.throw();
+
+        expect(() => {
+          fillWithColor(" ");
+        }).to.throw();
+
+        expect(() => {
+          fillWithColor("+");
+        }).to.throw();
+
+        expect(() => {
+          fillWithColor("字");
+        }).to.throw();
+      });
+
       it("outside canvas should fail", () => {
         expect(() => {
           canvas.fill(20, 1, color);
