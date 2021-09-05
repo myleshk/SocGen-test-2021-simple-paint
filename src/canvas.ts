@@ -14,9 +14,7 @@ class OutOfCanvasError extends InvalidCoordinatesError {
   message = "Coordinates are outside the canvas";
 }
 
-class InvalidColorError extends Error {
-  message = "Invalid color, only single English letter or digit is allowed";
-}
+class InvalidColorError extends Error {}
 
 class InvalidWidthError extends Error {
   message = "Width must be from 1 to 200";
@@ -99,8 +97,13 @@ class Cell {
    * @param color The color to validate.
    */
   static validateColor(color: string) {
+    if (color.length !== 1) {
+      throw new InvalidColorError("Only single character is allowed as color");
+    }
     if (!/^(?!x)[a-z0-9]$/i.test(color)) {
-      throw new InvalidColorError();
+      throw new InvalidColorError(
+        `Only digit or English letter (except "x") is allowed`
+      );
     }
   }
 }
